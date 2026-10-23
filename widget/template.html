@@ -1,0 +1,16 @@
+<div ng-if="data.myForm && data.myForm._sections.length">
+    <div ng-class="{'panel panel-default': !data.hide_container}">
+        <div class="panel-heading" ng-if="!data.hide_container">
+            <h3 class="panel-title" ng-if="data.formTitle">{{data.formTitle}}</h3>
+            <h3 class="panel-title" ng-if="!data.formTitle">${Scripted form}</h3>
+        </div>
+
+        <div ng-class="{'panel-body': !data.hide_container, 'variable-editor': data.hide_container}">
+            <sp-model form-model="::data.myForm" mandatory="[]"></sp-model>
+        </div>
+    </div>
+</div>
+
+<div ng-if="data.myForm && !data.myForm._sections.length" class="text-center text-muted">
+    <p>${No questions to display.}</p>
+</div>

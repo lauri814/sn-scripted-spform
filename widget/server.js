@@ -243,6 +243,9 @@
         ]
     };
 
+    data.formTitle = definition.title;
+    data.hide_container = false;
+
     // Keep this target GUID when adding server-update flows. Uploads themselves
     // persist sys_attachment records even though the form definition is transient.
     data.myForm = new ScriptedFormDefinition().build(definition, {
