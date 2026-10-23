@@ -38,8 +38,8 @@ mutate(d => { d.scripts[0].type = 'onChange'; d.scripts[0].fieldName = 'missing'
 mutate(d => { d.scripts = null; }, /expected an array/);
 mutate(d => { d.unrecognized = true; }, /unknown property/);
 mutate(d => { d.elements[0].fieldType = 'reference'; }, /Element field-summary.*Reference table/);
-assert.throws(() => adapter.build('{'), /valid JSON/);
-assert.throws(() => adapter.build(null), /expected an object/);
+assert.throws(() => adapter.build('{'), /could not parse JSON string/);
+assert.throws(() => adapter.build(null), /missing input/);
 const extra = JSON.parse(snapshot);
 extra.elements[1].options.hashKey = 'container-hash';
 extra.elements[1].columns[0].hashKey = 'left-hash';
@@ -57,3 +57,11 @@ const attachment = {schemaVersion: 1, id: 'attachment-demo', elements: [
 assert.throws(() => adapter.build(attachment), /attachmentGuid/);
 assert.equal(adapter.build(attachment, {attachmentGuid: 'temporary'})._attachmentGUID, 'temporary');
 console.log('Definition adapter checks passed: conversion, copying, layout, scripts, runtime context, validation, and reuse.');
+
+assert.throws(() => adapter.build(), /missing input/);
+assert.throws(() => adapter.build([]), /expected a JSON object/);
+const circular = {}; circular.self = circular;
+assert.throws(() => adapter.build(circular), /could not copy definition object/);
+vm.runInContext('var originalJSON = JSON; JSON = {parse: function () { throw new Error("JSON API diagnostic"); }};', context);
+assert.throws(() => adapter.build('{}'), /could not parse JSON string: JSON API diagnostic/);
+vm.runInContext('JSON = originalJSON;', context);

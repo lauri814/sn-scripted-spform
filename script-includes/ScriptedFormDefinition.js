@@ -5,12 +5,22 @@ ScriptedFormDefinition.prototype = {
     initialize: function () {},
 
     build: function (input, runtimeOptions) {
+        if (input === undefined || input === null)
+            throw new Error("definition: missing input; pass the form definition to build(definition, runtimeOptions)");
+        if (typeof input !== "string" && (typeof input !== "object" || Array.isArray(input)))
+            throw new Error("definition: expected a JSON object or valid JSON string; received " + typeof input);
+
         var definition;
+        var operation = typeof input === "string" ? "parse JSON string" : "copy definition object";
         try {
             definition = typeof input === "string" ? JSON.parse(input) :
                 JSON.parse(JSON.stringify(input));
         } catch (error) {
-            throw new Error("definition: expected a JSON object or valid JSON string");
+            // Preserve the underlying exception without logging the definition or
+            // its script sources. This distinguishes runtime JSON API failures
+            // from malformed or non-serializable input.
+            throw new Error("definition: could not " + operation + ": " +
+                (error && error.message ? error.message : String(error)));
         }
         this._object(definition, "definition");
         this._keys(definition, ["schemaVersion", "id", "title", "elements", "scripts", "editor"], "definition");
