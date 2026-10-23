@@ -12,8 +12,9 @@ const context = {
  }
 };
 vm.createContext(context);
-vm.runInContext(fs.readFileSync(require('path').join(__dirname, '../ui-actions/request-input.js'), 'utf8'), context);
-context.openRequestInputBuilder();
+const script = fs.readFileSync(require('path').join(__dirname, '../ui-actions/request-input.js'), 'utf8');
+vm.runInContext(script, context);
+vm.runInContext('openRequestInputBuilder();', context);
 assert.equal(opened.page, 'request_input_builder');
 assert.equal(opened.preferences.sysparm_task_id, 'a'.repeat(32));
 assert.equal(rendered, 1);

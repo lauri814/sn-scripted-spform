@@ -8,7 +8,7 @@ Create a UI Action with these settings:
 - Active: true; Client: true; Form button: true
 - Show insert: false; Show update: true
 - Condition: `!current.isNewRecord() && current.canWrite()`
-- Onclick: `openRequestInputBuilder(); return false;`
+- Onclick: `openRequestInputBuilder();`
 - Script: contents of `request-input.js`
 
 The action opens `request_input_builder` using the Classic `GlideModal` API and
@@ -21,3 +21,8 @@ is a presentation control, not authorization; the task service repeats its ACL
 checks on the server. This version does not submit the task, send a notification,
 or persist definitions/answers. Drafts are in memory and are lost on closing.
 No Workspace action or modal implementation is included.
+
+
+The Onclick field contains only `openRequestInputBuilder();`, with no
+`return false`. Define that function in the UI Action Script field and keep
+Client enabled. Save the action and reload the task form after updating it.

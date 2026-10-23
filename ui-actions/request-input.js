@@ -1,4 +1,4 @@
-// Classic UI client-side UI Action. Onclick: openRequestInputBuilder(); return false;
+// UI Action Script field. Onclick: openRequestInputBuilder();
 function openRequestInputBuilder() {
     if (g_form.isNewRecord()) {
         g_form.addInfoMessage('Save the task before building an input form.');

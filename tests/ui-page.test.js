@@ -83,6 +83,16 @@ click(action(card('question_1'), 'Remove'));
 assert(!card('question_1'));
 assert.equal(generated().elements[0].columns[0].elements.length, 1);
 assert.equal(frame.setCount, 1);
+// Advanced output/counter may be omitted in a customized modal template.
+delete ids['generated-definition'];
+delete ids['selected-count'];
+click(action(ids['form-canvas'], '+ Add question'));
+click(action(ids['form-canvas'], 'New question'));
+change('question_3-label', 'Still editable without optional outputs', 'input');
+assert(!ids['preview-form'].disabled);
+click(ids['preview-form']);
+assert.equal(sent[sent.length - 1].definition.elements[0].columns[0].elements[1].label,
+ 'Still editable without optional outputs');
 win.scriptedInputBuilderCleanup();
 assert.equal(win.message, undefined);
 console.log('Canvas UI checks passed: skeleton, add panel, new/source cards, configuration, columns, movement, merge, removal, on-demand preview, and cleanup.');

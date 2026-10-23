@@ -5,6 +5,13 @@
         if (!sourceElement) return;
         if (window.scriptedInputBuilderCleanup) window.scriptedInputBuilderCleanup();
         var status = document.getElementById('builder-status');
+        // Counter, context summary, and advanced JSON are optional presentation.
+        // A modal/customized template may omit them; form state and preview must
+        // not depend on those elements being present.
+        function setText(id, text) {
+            var element = document.getElementById(id);
+            if (element) element.textContent = text;
+        }
         var source;
         try {source = JSON.parse(decodeURIComponent(sourceElement.value));}
         catch (error) {status.textContent = 'Question data could not be read. Update both UI Page code fields.'; return;}
@@ -25,8 +32,8 @@
             ['url', 'URL'], ['ipAddress', 'IP address'], ['duration', 'Duration'],
             ['masked', 'Masked'], ['wideSingleLineText', 'Wide single line text']
         ];
-        document.getElementById('source-summary').textContent = source.taskNumber +
-            (source.ritmNumber ? ' / ' + source.ritmNumber : '');
+        setText('source-summary', source.taskNumber +
+            (source.ritmNumber ? ' / ' + source.ritmNumber : ''));
         function node(tag, css, text) {
             var el = document.createElement(tag);
             if (css) el.className = css;
@@ -92,8 +99,8 @@
         function changed(message) {
             var cards = all(), complete = cards.filter(valid).length;
             button.disabled = !cards.length || complete !== cards.length;
-            document.getElementById('selected-count').textContent = String(cards.length);
-            document.getElementById('generated-definition').textContent = JSON.stringify(definition(), null, 2);
+            setText('selected-count', String(cards.length));
+            setText('generated-definition', JSON.stringify(definition(), null, 2));
             status.textContent = complete !== cards.length ? 'Complete each question before previewing.' :
                 message + (previewStarted ? ' Choose Update preview to show your changes.' : '');
         }
@@ -233,7 +240,8 @@
             pendingDefinition = definition();
             if (!previewStarted) {
                 previewStarted = true; frame.style.display = 'block';
-                document.getElementById('preview-placeholder').style.display = 'none';
+                var placeholder = document.getElementById('preview-placeholder');
+                if (placeholder) placeholder.style.display = 'none';
                 button.textContent = 'Update preview'; frame.setAttribute('src', frame.getAttribute('data-src'));
             }
             status.textContent = previewReady ? 'Loading preview…' : 'Loading the preview page…'; send();

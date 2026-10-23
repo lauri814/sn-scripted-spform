@@ -29,7 +29,9 @@ questions are not offered by this GUI. The general builder's validation and
 native-field limitations still apply; this is not full native catalog parity.
 
 The Advanced disclosure contains generated JSON for troubleshooting; agents do
-not need to understand it. Incomplete cards are excluded from that output and
+not need to understand it. Its output element (`generated-definition`), the
+question counter, and context summary are optional; omitting them from a
+customized modal template does not block editing or preview. Incomplete cards are excluded from that output and
 block preview. Drafts are in memory and are lost when the modal closes.
 
 ## Install in a development instance
