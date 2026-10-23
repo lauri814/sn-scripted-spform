@@ -56,10 +56,11 @@ assert.equal(attachment._attachmentGUID, 'temporary-target');
 assert.equal(attachment._fields.file.attributes.max_file_size, '20');
 console.log('Builder generation checks passed: renderers, layout, checkbox hierarchy, choices, identities, copies, and invalid inputs.');
 
+vm.runInContext(fs.readFileSync(require('path').join(__dirname, '../script-includes/ScriptedFormDefinition.js'), 'utf8'), context);
 context.data = {};
 context.gs = {generateGUID: () => "0123456789abcdef0123456789abcdef"};
 vm.runInContext(fs.readFileSync(require('path').join(__dirname, '../widget/server.js'), 'utf8'), context);
-assert(context.data.myForm._fields.single_line_text);
+assert(context.data.myForm._fields.summary);
 assert.equal(context.data.myForm._sections[1].columns.length, 2);
 console.log('Widget example generates successfully.');
 

@@ -16,7 +16,8 @@ data.myForm = adapter.build(definition);
 
 A complete definition is in [../examples/form-definition.json](../examples/form-definition.json).
 The machine-readable structure is [form-definition.schema.json](form-definition.schema.json).
-The existing widget demo is unchanged.
+The widget server script includes a complete inline definition using this adapter,
+with additional field examples and an attachment target generated at runtime.
 
 ## Editor-oriented structure
 
