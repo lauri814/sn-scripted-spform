@@ -26,11 +26,12 @@ Questions start blank; existing source answers are never returned to this page.
    into HTML and `client.js` into Client script. Configure the UI Page's read ACL
    for the intended agent audience. The source service additionally requires
    read/write access to the actual task subclass and read access to the resolved variable owner.
-3. Create a separate Service Portal preview widget from `preview-widget/server.js`,
-   `client.js`, and `template.html`. Place it alone on a portal page with ID
-   `scripted_input_preview`. This preview is separate from the end-user widget.
+3. Install the single widget from `widget/server.js`, `widget/client.js`, and
+   `widget/template.html`. Place an instance on a portal page with ID
+   `scripted_input_preview`. The same widget supports both normal and preview use;
+   no separate preview widget is needed.
 4. Open `/request_input_builder.do?sysparm_task_id=<task record sys_id>` as an agent.
-   The preview iframe uses `/sp?id=scripted_input_preview` on the same origin.
+   The preview iframe uses `/sp?id=scripted_input_preview&sysparm_scripted_preview=true` on the same origin.
    If using another portal suffix, update that iframe URL. Verify that the portal
    can be framed by this page under the instance's framing policy.
 
@@ -50,7 +51,10 @@ field access, and choice field access.
 It reads existing stored-answer relationships; questions without those relationships
 and multi-row sets are not included. Secure-table visibility and
 native variable access parity need instance review; the service is not a claim
-of complete parity with every native variable access rule. The old `RequestInputSource` name remains a compatibility wrapper delegating to
+of complete parity with every native variable access rule. `TaskInputSource` is
+the single source Script Include for both catalog and record-producer variables.
+The redundant `RequestInputSource` compatibility wrapper has been removed. If it
+was installed previously, remove it after updating any external callers to
 `TaskInputSource`. Keep the UI Page ACL
 restricted to agents and verify least-privilege cases before use.
 
@@ -63,14 +67,14 @@ qualifier resolver instead of silently dropping their constraints. Attachment,
 custom widget, lookup, Requested For, and layout-marker conversion are not offered
 by this selector yet, even though the general builder has some of those methods.
 
-The preview widget re-authorizes and reloads questions on each render. It accepts
+The widget in preview mode re-authorizes and reloads questions on each render. It accepts
 selected source IDs/order/title and rebuilds authoritative field definitions; it
 ignores client-provided values, options, types, and scripts. Same-origin messages
 are also checked against the expected iframe/parent window. The JSON adapter
 is not exposed as an unrestricted client-callable service.
 
-The preview permits field interaction but its Save control is disabled. The
-end-user widget has a separate local-only Save placeholder. Neither updates
+Preview mode permits field interaction but disables Save. Normal mode uses
+the same widget with its local-only Save placeholder. Neither updates
 request variables. The preview is the generated form's native field rendering;
 it is not impersonation or proof that the eventual end user has identical lookup
 access or presentation. No end-user identity has been selected yet.

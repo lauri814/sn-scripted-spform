@@ -31,7 +31,7 @@
             </div>
             <div class="col-sm-7">
                 <h3>End-user preview</h3>
-                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/sp?id=scripted_input_preview"></iframe>
+                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/sp?id=scripted_input_preview&amp;sysparm_scripted_preview=true"></iframe>
             </div>
         </div>
     </div>

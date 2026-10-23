@@ -5,7 +5,7 @@ const path = require('path');
 const context = {Class: {create: () => function () {this.initialize.apply(this, arguments);}},
  gs: {hasRole: role => role === 'itil'}};
 vm.createContext(context);
-for (const name of ['ScriptedFormBuilder', 'ScriptedFormDefinition', 'TaskInputSource', 'RequestInputSource'])
+for (const name of ['ScriptedFormBuilder', 'ScriptedFormDefinition', 'TaskInputSource'])
  vm.runInContext(fs.readFileSync(path.join(__dirname, '../script-includes/' + name + '.js'), 'utf8'), context);
 const Source = context.TaskInputSource;
 const source = new Source();
@@ -26,7 +26,7 @@ context.TaskInputSource = function () {this.read = task => {
  if (task !== 'authorized-task') throw new Error('Task access denied');
  return {questions: [allowed]};
 };};
-const preview = fs.readFileSync(path.join(__dirname, '../preview-widget/server.js'), 'utf8');
+const preview = fs.readFileSync(path.join(__dirname, '../widget/server.js'), 'utf8');
 function render(input) { context.input = input; context.data = {}; vm.runInContext(preview, context); return context.data; }
 const good = {action: 'preview', taskId: 'authorized-task', definition: {schemaVersion: 1,
  title: 'Input needed', scripts: [{source: 'malicious'}], elements: [{id: 'source-' + allowed.id,

@@ -1,22 +1,26 @@
-<div ng-if="data.myForm && data.myForm._sections.length">
-    <div ng-class="{'panel panel-default': !data.hide_container}">
-        <div class="panel-heading" ng-if="!data.hide_container">
-            <h3 class="panel-title" ng-if="data.formTitle">{{data.formTitle}}</h3>
-            <h3 class="panel-title" ng-if="!data.formTitle">${Scripted form}</h3>
+<p class="text-muted" ng-if="c.data.previewMode && !c.render && !c.loading && !c.error">${Select questions and choose Preview form.}</p>
+<p role="status" ng-if="c.loading">${Loading preview...}</p>
+<div class="alert alert-danger" role="alert" ng-if="c.error">{{c.error}}</div>
+<div ng-if="c.render && c.data.myForm && c.data.myForm._sections.length">
+    <div ng-class="{'panel panel-default': !c.data.hide_container}">
+        <div class="panel-heading" ng-if="!c.data.hide_container">
+            <h3 class="panel-title" ng-if="c.data.formTitle">{{c.data.formTitle}}</h3>
+            <h3 class="panel-title" ng-if="!c.data.formTitle">${Scripted form}</h3>
         </div>
 
-        <div ng-class="{'panel-body': !data.hide_container, 'variable-editor': data.hide_container}">
-            <sp-model form-model="::data.myForm" mandatory="[]"></sp-model>
+        <div ng-class="{'panel-body': !c.data.hide_container, 'variable-editor': c.data.hide_container}">
+            <sp-model form-model="::c.data.myForm" mandatory="[]"></sp-model>
         </div>
 
-        <div ng-class="{'panel-footer': !data.hide_container}" class="clearfix">
+        <div ng-class="{'panel-footer': !c.data.hide_container}" class="clearfix">
             <button type="button" class="btn btn-primary pull-right"
-                    ng-click="c.save()" ng-disabled="!c.formReady">${Save}</button>
+                    ng-click="c.save()" ng-disabled="c.data.previewMode || !c.formReady">${Save}</button>
+            <span class="text-muted" ng-if="c.data.previewMode">${Preview only. Answers are not saved.}</span>
             <p class="help-block" role="status" aria-live="polite" ng-if="c.saveStatus">{{c.saveStatus}}</p>
         </div>
     </div>
 </div>
 
-<div ng-if="data.myForm && !data.myForm._sections.length" class="text-center text-muted">
+<div ng-if="c.data.myForm && !c.data.myForm._sections.length" class="text-center text-muted">
     <p>${No questions to display.}</p>
 </div>
