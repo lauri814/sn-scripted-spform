@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
-    <g:evaluate var="jvar_source_json">
+    <g:evaluate var="jvar_source_encoded">
         var payload;
         try {
             payload = new TaskInputSource().read(RP.getParameterValue('sysparm_task_id'));
         } catch (error) {
             payload = {error: String(error.message || error)};
         }
-        JSON.stringify(payload);
+        encodeURIComponent(JSON.stringify(payload));
     </g:evaluate>
-    <textarea id="source-data" style="display:none" aria-hidden="true"><j:out value="${jvar_source_json}" escapeText="true" /></textarea>
+    <input id="source-data" type="hidden" value="${jvar_source_encoded}" />
     <div class="container-fluid" id="request-input-builder">
         <h2>Request additional input</h2>
         <p id="source-summary"></p>
@@ -26,7 +26,7 @@
                 <button id="preview-form" type="button" class="btn btn-primary" disabled="disabled">Preview form</button>
                 <details>
                     <summary>Advanced: generated JSON</summary>
-                    <textarea id="generated-definition" class="form-control" rows="12" readonly="readonly" spellcheck="false" aria-label="Generated form JSON"></textarea>
+                    <pre id="generated-definition" tabindex="0" aria-label="Generated form JSON"></pre>
                 </details>
             </div>
             <div class="col-sm-7">

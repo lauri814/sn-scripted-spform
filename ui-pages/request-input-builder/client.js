@@ -3,7 +3,7 @@
     function start() {
         var sourceElement = document.getElementById('source-data');
         if (!sourceElement) return;
-        var source = JSON.parse(sourceElement.value);
+        var source = JSON.parse(decodeURIComponent(sourceElement.value));
         var status = document.getElementById('builder-status');
         var list = document.getElementById('available-variables');
         var button = document.getElementById('preview-form');
@@ -62,7 +62,7 @@
                         options: JSON.parse(JSON.stringify(question.options))};
                 })
             };
-            document.getElementById('generated-definition').value = JSON.stringify(pendingDefinition, null, 2);
+            document.getElementById('generated-definition').textContent = JSON.stringify(pendingDefinition, null, 2);
             status.textContent = previewReady ? 'Loading preview…' : 'Waiting for the preview page. Check the portal preview installation if it does not load.';
             send();
         });
