@@ -39,8 +39,8 @@ compile the Angular template.
 This widget now handles both normal rendering and the agent selector preview.
 There is no separate preview-widget implementation to install or maintain.
 
-Place this widget on the portal page `scripted_input_preview`. The agent UI Page
-loads `/sp?id=scripted_input_preview&sysparm_scripted_preview=true`. You can also
+Place this widget on the portal page `newpage` in `/esc`. The agent UI Page
+loads `/esc?id=newpage&table=<actual_task_table>&sys_id=<task_sys_id>&sysparm_scripted_preview=true`. You can also
 set the widget instance option `preview_mode` to the string `"true"` (add the
 option to the instance option schema if configuring it through the editor).
 Without either setting, the normal inline demo definition renders as before.
@@ -59,6 +59,6 @@ normal end-user flow still has no direct source-variable reader or persistence.
 Preview uses the agent's session; it is not end-user impersonation.
 
 To migrate an existing installation, replace the separate preview widget instance
-on `scripted_input_preview` with this widget, update its three code fields, and
+on `newpage` with this widget, update its three code fields, and
 update the UI Page HTML for the preview-mode URL. The old preview widget can be
 removed from the instance after confirming nothing else uses it.

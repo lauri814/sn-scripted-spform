@@ -28,11 +28,13 @@ Questions start blank; existing source answers are never returned to this page.
    read/write access to the actual task subclass and read access to the resolved variable owner.
 3. Install the single widget from `widget/server.js`, `widget/client.js`, and
    `widget/template.html`. Place an instance on a portal page with ID
-   `scripted_input_preview`. The same widget supports both normal and preview use;
+   `newpage` in `/esc`. The same widget supports both normal and preview use;
    no separate preview widget is needed.
 4. Open `/request_input_builder.do?sysparm_task_id=<task record sys_id>` as an agent.
-   The preview iframe uses `/sp?id=scripted_input_preview&sysparm_scripted_preview=true` on the same origin.
-   If using another portal suffix, update that iframe URL. Verify that the portal
+   The preview iframe uses `/esc?id=newpage&table=<actual_task_table>&sys_id=<task_sys_id>&sysparm_scripted_preview=true` on the same origin.
+   The page ID `newpage` is temporary; change it in the iframe URL when ready. The
+   iframe resolves the actual task class server-side for `table` (for example
+   `incident` or `sc_task`) and passes the validated original task ID as `sys_id`. Verify that the portal
    can be framed by this page under the instance's framing policy.
 
 This is a first functional implementation candidate, not instance-validated.

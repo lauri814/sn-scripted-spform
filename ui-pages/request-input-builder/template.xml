@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
-    <g:evaluate var="jvar_source_encoded">
+    <g:evaluate var="jvar_task_id">
+        var taskId = String(RP.getParameterValue('sysparm_task_id') || '');
+        /^[a-f0-9]{32}$/.test(taskId) ? taskId : '';
+    </g:evaluate>
+    <g:evaluate var="jvar_task_table" jelly="true">
+        var taskTable = '';
+        var taskRecord = new GlideRecordSecure('task');
+        if (jelly.jvar_task_id &amp;&amp; taskRecord.get(jelly.jvar_task_id) &amp;&amp; taskRecord.canRead())
+            taskTable = String(taskRecord.getRecordClassName());
+        encodeURIComponent(taskTable);
+    </g:evaluate>
+    <g:evaluate var="jvar_source_encoded" jelly="true">
         var payload;
         try {
-            payload = new TaskInputSource().read(RP.getParameterValue('sysparm_task_id'));
+            payload = new TaskInputSource().read(jelly.jvar_task_id);
         } catch (error) {
             payload = {error: String(error.message || error)};
         }
@@ -31,7 +42,7 @@
             </div>
             <div class="col-sm-7">
                 <h3>End-user preview</h3>
-                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/sp?id=scripted_input_preview&amp;sysparm_scripted_preview=true"></iframe>
+                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/esc?id=newpage&amp;table=${jvar_task_table}&amp;sys_id=${jvar_task_id}&amp;sysparm_scripted_preview=true"></iframe>
             </div>
         </div>
     </div>
