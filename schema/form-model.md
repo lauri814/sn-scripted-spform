@@ -131,7 +131,6 @@ scope and one-column restriction above.
 | `duration` | `glide_duration` | `DurationQuestion` |
 | `url` | `url` | `UrlQuestion`; no URL validation script is bundled |
 | `email` | `email` | `EmailQuestion`; no email validation script is bundled |
-| `tableName` | `table_name` | `TableNameQuestion` |
 | `label` | `label` | Layout entry includes `label` |
 | `breakField` | `break` | Layout entry uses `type: "break"` |
 | `selectBox` | `choice` | Required `choices`, `SelectQuestion` |
@@ -146,7 +145,6 @@ scope and one-column restriction above.
 | `custom` | `widget` | Required `widget` model containing `template`, `MacroQuestion` |
 | `customWithLabel` | `widget` | Same widget requirement, `MacroWithLabelQuestion` |
 | `attachment` | `sc_attachment` | Builder constructor requires `attachmentGuid`; optional `maxFileSize` (MB), `allowedExtensions` |
-| `uiPage` | Unsupported | Throws with instructions to use a portal widget adapter |
 
 Choice objects require string `label` and a `value` converted to string. Existing
 choice `hashKey` properties are retained. Initial selection is derived from the
@@ -189,7 +187,7 @@ its child and the checkbox is the group's child.
 These are generated model shapes, not verified end-to-end variable support.
 Local tests exercise generation only. Portal checks are still required for all
 new renderers, checkbox mandatory/visibility behavior, container propagation,
-and columns. Native reference, list, table-name, radio, and Requested For
+and columns. Native reference, list, radio, and Requested For
 components may still depend on record identities or other metadata.
 
 Requested For access validation is explicitly disabled (`validate_on_change:
@@ -206,9 +204,10 @@ non-persistent workflow. Supply an authorized temporary target GUID only when
 that behavior is intended. Upload/delete functionality without persisted
 question metadata is unverified.
 
-UI Page has no dedicated branch in the supplied portal template. Its captured
-model was `string` / `UIPageQuestion`, which alone would not implement UI Page
-execution. Use a Service Portal widget adapter instead; no silent fallback is
-claimed.
-
 Run local generation checks with `node tests/builder.test.js`.
+
+The widget example creates a temporary attachment target with `gs.generateGUID()`
+and includes an Attachment field (20 MB maximum, no extension restriction).
+The GUID is created on each server execution; preserve it explicitly if adding
+server-update flows. No question or catalog item is inserted. Uploads still
+persist attachment records. Table Name and UI Page are excluded from the API.

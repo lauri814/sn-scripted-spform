@@ -1,5 +1,8 @@
 (function () {
-    var builder = new ScriptedFormBuilder();
+    // A temporary attachment target; no question or catalog item is inserted.
+    var builder = new ScriptedFormBuilder({
+        attachmentGuid: gs.generateGUID()
+    });
 
     builder
         .singleLineText("single_line_text", "Single Line Text")
@@ -28,10 +31,13 @@
         .ipAddress("ip_address", "IP Address")
         .duration("duration", "Duration")
         .masked("masked", "Masked")
-        .tableName("table_name", "Table Name")
         .listCollector("list_collector", "List Collector", {reference: "sys_user"})
         .containerEnd()
         .breakField("break", "Break")
+        .attachment("attachment", "Attachment", {
+            maxFileSize: 20,
+            allowedExtensions: ""
+        })
         .html("html", "HTML")
         .richTextLabel("rich_text_label", "Rich Text Label", {value: "Additional information"});
 
@@ -40,9 +46,8 @@
     // - custom / customWithLabel require an actual widget model.
     // - requestedFor emits a candidate specialized model; native item-access
     //   validation is disabled because there is no persisted catalog item.
-    // - attachment requires new ScriptedFormBuilder({attachmentGuid: ...});
-    //   uploads persist attachment records and are outside this in-memory demo.
-    // - UI Page requires a portal widget adapter; uiPage() reports this limit.
+    // Attachment uploads persist sys_attachment records against the temporary
+    // target GUID. Preserve that GUID if adding server-update flows later.
 
     data.myForm = builder.build();
 })();

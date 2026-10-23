@@ -35,11 +35,12 @@ assert.throws(() => new Builder().containerEnd());
 assert.throws(() => new Builder().containerStart('open', 'Open').build());
 assert.throws(() => new Builder().containerStart('outer', '').containerStart('inner', ''));
 assert.throws(() => new Builder().attachment('file', 'File'));
-assert.throws(() => new Builder().uiPage());
+assert.equal(typeof Builder.prototype.uiPage, 'undefined');
+assert.equal(typeof Builder.prototype.tableName, 'undefined');
 assert.throws(() => new Builder().numericScale('bad', 'Bad', {min: 5, max: 1}));
 assert.throws(() => new Builder().multipleChoice('bad', '', {value: 'x', choices: []}));
 const all = new Builder();
-for (const method of ['wideSingleLineText', 'html', 'richTextLabel', 'ipAddress', 'date', 'dateTime', 'duration', 'url', 'email', 'tableName', 'label', 'breakField', 'masked', 'numericScale', 'yesNo']) {
+for (const method of ['wideSingleLineText', 'html', 'richTextLabel', 'ipAddress', 'date', 'dateTime', 'duration', 'url', 'email', 'label', 'breakField', 'masked', 'numericScale', 'yesNo']) {
  all[method](method.replace(/[A-Z]/g, c => '_' + c.toLowerCase()), method);
 }
 all.listCollector('users', 'Users', {reference: 'sys_user'})
@@ -56,7 +57,11 @@ assert.equal(attachment._fields.file.attributes.max_file_size, '20');
 console.log('Builder generation checks passed: renderers, layout, checkbox hierarchy, choices, identities, copies, and invalid inputs.');
 
 context.data = {};
+context.gs = {generateGUID: () => "0123456789abcdef0123456789abcdef"};
 vm.runInContext(fs.readFileSync(require('path').join(__dirname, '../widget/server.js'), 'utf8'), context);
 assert(context.data.myForm._fields.single_line_text);
 assert.equal(context.data.myForm._sections[1].columns.length, 2);
 console.log('Widget example generates successfully.');
+
+assert.equal(context.data.myForm._fields.attachment.type, "sc_attachment");
+assert.equal(context.data.myForm._attachmentGUID, context.gs.generateGUID());

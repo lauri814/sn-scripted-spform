@@ -170,10 +170,6 @@ ScriptedFormBuilder.prototype = {
         return this._simple(name, label, "email", "EmailQuestion", options);
     },
 
-    tableName: function (name, label, options) {
-        return this._simple(name, label, "table_name", "TableNameQuestion", options);
-    },
-
     label: function (name, label, options) {
         return this._simple(name, label, "label", "", options);
     },
@@ -318,12 +314,6 @@ ScriptedFormBuilder.prototype = {
         field._class_name = className;
         field.widget = JSON.parse(JSON.stringify(options.widget));
         return this._addField(field, options);
-    },
-
-    // The supplied portal template has no UI Page renderer. Do not silently
-    // present an ordinary text input as an implemented UI Page.
-    uiPage: function () {
-        throw new Error("UI Page requires a Service Portal widget adapter; use custom()");
     },
 
     attachment: function (name, label, options) {
