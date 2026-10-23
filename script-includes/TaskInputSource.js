@@ -36,6 +36,95 @@ TaskInputSource.prototype = {
         return result;
     },
 
+    // Agent-authored GUI definitions: authorize task context, resolve source
+    // questions, and allow only non-executable configuration for new fields.
+    buildDefinition: function (taskId, requested) {
+        var source = this.read(taskId);
+        if (!requested || requested.schemaVersion !== 1 || !Array.isArray(requested.elements))
+            throw new Error("Invalid form definition.");
+        var state = {available: {}, used: {}, count: 0};
+        source.questions.forEach(function (question) {state.available["source-" + question.id] = question;});
+        var result = {schemaVersion: 1, id: "agent-input-form",
+            title: typeof requested.title === "string" ? requested.title.substring(0, 200) : "Additional information needed",
+            elements: []};
+        if (requested.elements.length === 1 && requested.elements[0].kind === "container") {
+            var container = requested.elements[0];
+            if (!Array.isArray(container.columns) || container.columns.length < 1 || container.columns.length > 2)
+                throw new Error("Choose a one- or two-column layout.");
+            var output = {id: "form-layout", kind: "container", name: "input_questions", label: "",
+                options: {layout: container.columns.length === 2 ? "2down" : "normal"}, columns: []};
+            for (var c = 0; c < container.columns.length; c++) {
+                var column = container.columns[c];
+                if (!column || !Array.isArray(column.elements)) throw new Error("Invalid column.");
+                var elements = [];
+                for (var i = 0; i < column.elements.length; i++)
+                    elements.push(this._authorField(column.elements[i], state));
+                output.columns.push({id: "column-" + c, elements: elements});
+            }
+            result.elements.push(output);
+        } else {
+            // Retain compatibility with the previous flat selector definition.
+            for (var f = 0; f < requested.elements.length; f++)
+                result.elements.push(this._authorField(requested.elements[f], state));
+        }
+        if (!state.count) throw new Error("Add at least one complete question.");
+        return result;
+    },
+
+    _authorField: function (element, state) {
+        if (!element || element.kind && element.kind !== "field" || typeof element.id !== "string")
+            throw new Error("Invalid question.");
+        state.count++;
+        if (state.count > 100) throw new Error("A form supports at most 100 questions.");
+        if (Object.prototype.hasOwnProperty.call(state.used, element.id)) throw new Error("A question was added more than once.");
+        state.used[element.id] = true;
+        var requested = element.options || {};
+        var options = {mandatory: requested.mandatory === true};
+        var source = state.available[element.id];
+        if (source) {
+            if (!source.supported) throw new Error("A selected source question is unavailable.");
+            options = JSON.parse(JSON.stringify(source.options));
+            options.mandatory = requested.mandatory === true;
+            return {id: "source-" + source.id, kind: "field", name: "input_" + source.id,
+                fieldType: source.fieldType, label: source.label, options: options};
+        }
+        if (!/^question_[1-9][0-9]*$/.test(element.id)) throw new Error("A selected source question is unavailable.");
+        var allowed = ["singleLineText", "multiLineText", "wideSingleLineText", "yesNo", "checkbox",
+            "selectBox", "multipleChoice", "numericScale", "reference", "listCollector", "date", "dateTime",
+            "email", "url", "ipAddress", "duration", "masked"];
+        if (allowed.indexOf(element.fieldType) < 0) throw new Error("Unsupported new question type.");
+        if (typeof element.label !== "string" || !element.label.replace(/\s/g, "") || element.label.length > 200)
+            throw new Error("Each new question needs a label of at most 200 characters.");
+        if (element.fieldType === "reference" || element.fieldType === "listCollector") {
+            if (["sys_user", "sys_user_group", "cmdb_ci"].indexOf(requested.reference) < 0)
+                throw new Error("Choose Users, Groups, or Configuration items for the reference.");
+            options.reference = requested.reference;
+        }
+        if (element.fieldType === "numericScale") {
+            if (typeof requested.min !== "number" || typeof requested.max !== "number" ||
+                !isFinite(requested.min) || !isFinite(requested.max) || requested.min % 1 || requested.max % 1 ||
+                requested.max < requested.min || requested.max - requested.min > 1000)
+                throw new Error("The numeric scale needs valid integer bounds.");
+            options.min = requested.min; options.max = requested.max;
+        }
+        if (element.fieldType === "selectBox" || element.fieldType === "multipleChoice") {
+            if (!Array.isArray(requested.choices) || !requested.choices.length || requested.choices.length > 100)
+                throw new Error("Supply between 1 and 100 choices.");
+            options.choices = [];
+            var values = {};
+            for (var c = 0; c < requested.choices.length; c++) {
+                var choice = requested.choices[c];
+                if (!choice || typeof choice.label !== "string" || !choice.label.replace(/\s/g, "") || choice.label.length > 200 ||
+                    typeof choice.value !== "string" || !/^choice_[1-9][0-9]*$/.test(choice.value) || values[choice.value])
+                    throw new Error("Each choice needs a label and a unique generated value.");
+                values[choice.value] = true;
+                options.choices.push({label: choice.label, value: choice.value});
+            }
+        }
+        return {id: element.id, kind: "field", name: element.id, fieldType: element.fieldType,
+            label: element.label, options: options};
+    },
+
     _readCatalog: function (ritmId, result, seen) {
         var links = new GlideRecordSecure("sc_item_option_mtom");
         links.addQuery("request_item", ritmId);

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
     <g:evaluate var="jvar_task_id">
-        var taskId = String(RP.getParameterValue('sysparm_task_id') || '');
+        var taskId = String(RP.getParameterValue('sysparm_task_id') ||
+            RP.getWindowProperties().get('sysparm_task_id') || '');
         /^[a-f0-9]{32}$/.test(taskId) ? taskId : '';
     </g:evaluate>
     <g:evaluate var="jvar_task_table" jelly="true">
@@ -22,28 +23,42 @@
     </g:evaluate>
     <input id="source-data" type="hidden" value="${jvar_source_encoded}" />
     <div class="container-fluid" id="request-input-builder">
-        <h2>Request additional input</h2>
-        <p id="source-summary"></p>
-        <p class="text-muted">Choose questions for a separate input form. Source task variables will not be updated.</p>
-        <div class="form-group">
-            <label for="input-form-title">Form title</label>
-            <input id="input-form-title" class="form-control" value="Additional information needed" />
+        <div class="page-header">
+            <h2>Build an input form</h2>
+            <p id="source-summary" class="text-muted"></p>
+            <p>Add questions from this task or create new ones. Answers start blank and source variables stay unchanged.</p>
         </div>
-        <p id="builder-status" role="status" aria-live="polite"></p>
         <div class="row">
-            <div class="col-sm-5">
-                <h3>Available questions</h3>
-                <div id="available-variables"></div>
-                <button id="preview-form" type="button" class="btn btn-primary" disabled="disabled">Preview form</button>
-                <details>
-                    <summary>Advanced: generated JSON</summary>
-                    <pre id="generated-definition" tabindex="0" aria-label="Generated form JSON"></pre>
-                </details>
+            <div class="col-sm-8 form-group">
+                <label for="input-form-title">Form title</label>
+                <input id="input-form-title" class="form-control" value="Additional information needed" maxlength="200" />
             </div>
-            <div class="col-sm-7">
-                <h3>End-user preview</h3>
+            <div class="col-sm-4 form-group">
+                <label for="form-layout">Layout</label>
+                <select id="form-layout" class="form-control">
+                    <option value="1">One column</option>
+                    <option value="2">Two columns</option>
+                </select>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">Your form <span id="selected-count" class="badge">0</span></h3></div>
+            <div class="panel-body"><div id="form-canvas" class="row"></div></div>
+            <div class="panel-footer clearfix">
+                <button id="preview-form" type="button" class="btn btn-primary pull-right" disabled="disabled">Preview form</button>
+                <p id="builder-status" role="status" aria-live="polite"></p>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><h3 class="panel-title">End-user preview</h3></div>
+            <div class="panel-body">
+                <p id="preview-placeholder" class="text-muted">Add questions and choose Preview form to load the preview.</p>
                 <iframe id="form-preview" title="End-user form preview" style="display:none; width:100%; min-height:600px; border:0" data-src="/esc?id=newpage&amp;table=${jvar_task_table}&amp;sys_id=${jvar_task_id}&amp;sysparm_scripted_preview=true"></iframe>
             </div>
         </div>
+        <details>
+            <summary>Advanced: generated JSON</summary>
+            <pre id="generated-definition" tabindex="0" aria-label="Generated form JSON"></pre>
+        </details>
     </div>
 </j:jelly>

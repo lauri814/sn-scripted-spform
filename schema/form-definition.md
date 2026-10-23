@@ -78,7 +78,8 @@ the adapter. Builder errors identify the offending element ID and name.
 
 The adapter copies input, does not mutate the definition, and returns only the
 builder's runtime model. Editor metadata and node IDs are not copied into that
-model (choice IDs remain in copied choice objects). No GUI, persistence layer,
-code execution endpoint, or schema migration is implemented yet.
+model (choice IDs remain in copied choice objects). The Classic UI Page in `ui-pages/request-input-builder` now authors a limited
+subset of this schema. No persistence layer, arbitrary code execution endpoint,
+or schema migration is implemented.
 
 Run `node tests/definition.test.js` and `node tests/builder.test.js` locally.

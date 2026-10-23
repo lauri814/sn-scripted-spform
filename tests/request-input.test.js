@@ -21,11 +21,12 @@ assert.equal(source._question(record({type: '4', scale_min: '5', scale_max: '0'}
 assert.throws(() => source.read('not-a-task-id'), /from a task/);
 let sourceCalls = 0;
 const allowed = {id: 'a'.repeat(32), label: 'Summary', fieldType: 'singleLineText', options: {}, supported: true};
-context.TaskInputSource = function () {this.read = task => {
+const originalRead = Source.prototype.read;
+Source.prototype.read = function (task) {
  sourceCalls++;
  if (task !== 'authorized-task') throw new Error('Task access denied');
  return {questions: [allowed]};
-};};
+};
 const preview = fs.readFileSync(path.join(__dirname, '../widget/server.js'), 'utf8');
 function render(input) { context.input = input; context.data = {}; vm.runInContext(preview, context); return context.data; }
 const good = {action: 'preview', taskId: 'authorized-task', definition: {schemaVersion: 1,
@@ -43,6 +44,44 @@ assert(render(duplicate).error);
 const stale = JSON.parse(JSON.stringify(good)); stale.definition.elements[0].id = 'missing';
 assert(render(stale).error);
 console.log('Source conversion and preview boundary checks passed: source types, roles, qualifiers, blank answers, authorization, and browser tampering.');
+
+// Mixed authored/source columns are normalized server-side without scripts/defaults.
+const authored = {action: 'preview', taskId: 'authorized-task', definition: {
+ schemaVersion: 1, title: 'Authored form', scripts: [{source: 'not allowed'}], elements: [{
+  kind: 'container', id: 'browser-layout', columns: [
+   {elements: [{id: 'source-' + allowed.id, kind: 'field', options: {mandatory: true, value: 'old'}}]},
+   {elements: [{id: 'question_1', kind: 'field', fieldType: 'selectBox', label: 'Pick one', options: {
+    mandatory: true, value: 'choice_1', choices: [{label: 'First', value: 'choice_1'}], widget: {template: 'bad'}
+   }}]}
+  ]
+ }]}};
+const authoredResult = render(authored);
+assert(!authoredResult.error, authoredResult.error);
+assert.equal(authoredResult.myForm._sections[0].columns.length, 2);
+assert.equal(authoredResult.myForm._sections[0].layout, '2down');
+assert.equal(authoredResult.myForm._fields.question_1.value, '');
+assert.equal(authoredResult.myForm._fields.question_1.mandatory, true);
+assert.equal(authoredResult.myForm._fields['input_' + allowed.id].mandatory, true);
+assert.equal(authoredResult.myForm.client_script.onLoad.length, 0);
+const unsupported = JSON.parse(JSON.stringify(authored));
+unsupported.definition.elements[0].columns[1].elements[0].fieldType = 'custom';
+assert(render(unsupported).error.includes('Unsupported new question type'));
+const badReference = JSON.parse(JSON.stringify(authored));
+badReference.definition.elements[0].columns[1].elements[0].fieldType = 'reference';
+badReference.definition.elements[0].columns[1].elements[0].options.reference = 'sys_user_has_role';
+assert(render(badReference).error.includes('Choose Users'));
+const emptyLabel = JSON.parse(JSON.stringify(authored));
+emptyLabel.definition.elements[0].columns[1].elements[0].label = ' ';
+assert(render(emptyLabel).error.includes('label'));
+const tooManyColumns = JSON.parse(JSON.stringify(authored));
+tooManyColumns.definition.elements[0].columns.push({elements: []});
+assert(render(tooManyColumns).error.includes('two-column'));
+const nested = JSON.parse(JSON.stringify(authored));
+nested.definition.elements[0].columns[0].elements[0] = {kind: 'container', id: 'nested'};
+assert(render(nested).error.includes('Invalid question'));
+console.log('Authored-preview checks passed: mixed columns, blank answers, required flags, source reauthorization, and configuration filtering.');
+
+Source.prototype.read = originalRead;
 
 // Route from any task while preserving that task as the response context.
 const taskId = 'b'.repeat(32), ritmId = 'c'.repeat(32);

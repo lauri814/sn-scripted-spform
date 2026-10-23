@@ -1,94 +1,106 @@
-# Agent selector from any task
+# Classic task input-form designer
 
-The entry point is any record extending `task`. The original task remains the
-interaction context for agent and eventual end-user flows. Variable storage is
-resolved separately:
+The agent opens this page in a Classic form modal using the UI Action in
+`ui-actions/`. The same page can also be opened directly with
+`/request_input_builder.do?sysparm_task_id=<task sys_id>`.
 
-- `sc_task` (including subclasses): follow `request_item` to `sc_req_item`, then
-  read `sc_item_option_mtom` / `sc_item_option` relationships.
-- `sc_req_item` itself: read its catalog variable relationships directly.
-- Other task classes: read record-producer answers from `question_answer`, using
-  `table_sys_id` and checking that `table_name` belongs to the actual task's class
-  hierarchy. Tasks without stored questions produce an empty selectable list.
+## Build a form
 
-Both paths resolve question definitions through `item_option_new`. Custom
-variable stores and multi-row sets are not supported by these readers yet.
- The agent selects questions and clicks
-**Preview form**; the page builds version-1 JSON automatically. JSON is shown only
-inside the optional Advanced disclosure. Selection order determines field order.
-Questions start blank; existing source answers are never returned to this page.
+1. The page opens with an empty one-column form skeleton.
+2. Choose **One column** or **Two columns**.
+3. Click **+ Add question** at the end of a column. The inline panel offers
+   **From variable** and **New question**.
+4. Either choice appends a card at the end of that column:
+   - **From variable:** select a readable, supported task variable. Existing
+     answers are never copied. Unsupported choices are disabled with a reason.
+   - **New question:** choose a type and enter a label. Configure choices,
+     reference target, or numeric bounds when relevant. Check **Required** if needed.
+5. Move cards up/down or between columns, or remove them. Switching to one column
+   appends all right-column cards after the left-column cards without losing them.
+6. Complete every card, then click **Preview form**. The iframe loads only then.
+   Later changes require **Update preview**; edits never reload it automatically.
+
+New-question types currently include text, multiline text, yes/no, checkbox,
+select box, multiple choice, numeric scale, reference, list collector, date,
+date/time, email, URL, IP address, duration, masked, and wide text. Choice values
+are generated automatically. New reference/list targets are currently Users,
+Groups, or Configuration items. Custom widget/script/HTML authoring and upload
+questions are not offered by this GUI. The general builder's validation and
+native-field limitations still apply; this is not full native catalog parity.
+
+The Advanced disclosure contains generated JSON for troubleshooting; agents do
+not need to understand it. Incomplete cards are excluded from that output and
+block preview. Drafts are in memory and are lost when the modal closes.
 
 ## Install in a development instance
 
 1. Install server-only Script Includes `TaskInputSource`, `ScriptedFormBuilder`,
    and `ScriptedFormDefinition`, with Client callable disabled.
-2. Create a non-public UI Page named `request_input_builder`. Copy `template.xml`
-   into HTML and `client.js` into Client script. Configure the UI Page's read ACL
-   for the intended agent audience. The source service additionally requires
-   read/write access to the actual task subclass and read access to the resolved variable owner.
-3. Install the single widget from `widget/server.js`, `widget/client.js`, and
-   `widget/template.html`. Place an instance on a portal page with ID
-   `newpage` in `/esc`. The same widget supports both normal and preview use;
-   no separate preview widget is needed.
-4. Open `/request_input_builder.do?sysparm_task_id=<task record sys_id>` as an agent.
-   The preview iframe uses `/esc?id=newpage&table=<actual_task_table>&sys_id=<task_sys_id>&sysparm_scripted_preview=true` on the same origin.
-   The page ID `newpage` is temporary; change it in the iframe URL when ready. The
-   iframe resolves the actual task class server-side for `table` (for example
-   `incident` or `sc_task`) and passes the validated original task ID as `sys_id`. Verify that the portal
-   can be framed by this page under the instance's framing policy.
+2. Create/update non-public UI Page `request_input_builder`: use `template.xml`
+   as HTML and `client.js` as Client script. Restrict the UI Page ACL to agents.
+3. Install the one widget from `widget/server.js`, `widget/client.js`, and
+   `widget/template.html`. Put it on ESC page `newpage` (temporary page ID).
+4. Install the Classic UI Action as described in `ui-actions/README.md`.
+5. Open a saved, editable task in Classic and click **Request additional input**.
 
-This is a first functional implementation candidate, not instance-validated.
-Bootstrap class names follow the widget style; UI Page theme asset availability,
-Jelly evaluation/escaping, native ACL behavior, and portal framing need verification.
-No Classic UI Action or Workspace modal launcher has been installed. Both can
-open this task-context URL later; the correct launcher depends on the host UI.
-No notification, end-user link, persistence, or completed save workflow exists yet.
+The UI Page reads the task ID from the modal preference or URL parameter. The
+preview uses `/esc?id=newpage&table=<actual task table>&sys_id=<task sys_id>&sysparm_scripted_preview=true`.
+Change `newpage` in `template.xml` later. The actual task table is resolved
+server-side, for example `incident` or `sc_task`. Verify instance framing policy
+permits the portal iframe. No Workspace launcher is implemented.
 
-## Separation and access
+## Variable sources and context
 
-`TaskInputSource.read(taskId)` uses `GlideRecordSecure` for the task, RITM,
-`sc_item_option_mtom`, `sc_item_option`, `question_answer`, `item_option_new`, and `question_choice`.
-It checks referenced-field access, question and variable-set read roles, metadata
-field access, and choice field access.
-It reads existing stored-answer relationships; questions without those relationships
-and multi-row sets are not included. Secure-table visibility and
-native variable access parity need instance review; the service is not a claim
-of complete parity with every native variable access rule. `TaskInputSource` is
-the single source Script Include for both catalog and record-producer variables.
-The redundant `RequestInputSource` compatibility wrapper has been removed. If it
-was installed previously, remove it after updating any external callers to
-`TaskInputSource`. Keep the UI Page ACL
-restricted to agents and verify least-privilege cases before use.
+The original task remains the interaction context; variable storage is separate:
 
-Supported basic source types are converted into independent questions. Source
-identities appear in editor IDs/names for stable matching, not as native question
-sys_id properties. Existing readonly/mandatory states, defaults, client scripts,
-policies, and answer values are not copied. Unsupported source types are displayed
-as disabled with a reason. Qualified references are disabled pending a supported
-qualifier resolver instead of silently dropping their constraints. Attachment,
-custom widget, lookup, Requested For, and layout-marker conversion are not offered
-by this selector yet, even though the general builder has some of those methods.
+- `sc_task` and subclasses: follow `request_item` to the RITM and read
+  `sc_item_option_mtom` / `sc_item_option`.
+- `sc_req_item` directly: read its catalog variable relationships.
+- Other task classes: read record-producer `question_answer` rows matching the
+  task ID and compatible table hierarchy.
 
-The widget in preview mode re-authorizes and reloads questions on each render. It accepts
-selected source IDs/order/title and rebuilds authoritative field definitions; it
-ignores client-provided values, options, types, and scripts. Same-origin messages
-are also checked against the expected iframe/parent window. The JSON adapter
-is not exposed as an unrestricted client-callable service.
+Question definitions are resolved through `item_option_new`. The service uses
+`GlideRecordSecure`, checks the actual task subclass's read/write access, source
+reference and metadata field access, and question/variable-set read roles.
+Custom variable stores, multi-row sets, and questions without stored-answer
+relationships are not included. Qualified references are disabled pending a
+qualifier resolver; their constraints are not silently discarded.
 
-Preview mode permits field interaction but disables Save. Normal mode uses
-the same widget with its local-only Save placeholder. Neither updates
-request variables. The preview is the generated form's native field rendering;
-it is not impersonation or proof that the eventual end user has identical lookup
-access or presentation. No end-user identity has been selected yet.
+`TaskInputSource` is the single task service. Remove the old `RequestInputSource`
+wrapper after migrating any external callers. Its new
+`buildDefinition(taskId, requested)` method re-authorizes the task, resolves
+source IDs authoritatively, and accepts only the GUI's supported non-executable
+new-question settings. It supports one/two columns and up to 100 questions.
+Browser source types, labels, choices, scripts, and defaults are not trusted.
+Only the Required flag can override a source question's initial configuration.
+New questions have generated names, validated labels and choices, no script
+sources, and no initial answers. A definition is passed to the existing JSON
+adapter; `ScriptedFormBuilder` is unchanged by this UI work.
 
-## Instance validation
+Same-origin preview messages also verify the sender window. The preview uses the
+agent's session; it is not end-user impersonation. It permits field interaction
+but disables Save. Normal widget mode retains the local-only Save placeholder.
+No original variables are updated. No definitions, responses, notifications, or
+end-user links are persisted or sent yet.
 
-Check an editable non-catalog task with record-producer questions, a task without questions, a catalog task and its RITM, an unauthorized task, a read-only task,
-variable read roles, static choices, disabled types, reference qualifiers,
-empty sources, blank starting answers, selecting/deselecting, repeated previews,
-and HTML-like question labels. Verify current source values remain unchanged.
-Then test the page from each intended Classic/Workspace entry point.
+## Checks
 
-The agent preview iframe remains hidden and does not load the portal until the
-first **Preview form** click. Subsequent clicks reuse it and send updated
-definitions. Selecting questions alone does not load it.
+Local commands:
+
+- `node tests/ui-page.test.js`
+- `node tests/classic-ui-action.test.js`
+- `node tests/request-input.test.js`
+- `node tests/widget-client.test.js`
+- `node tests/builder.test.js`
+- `node tests/definition.test.js`
+
+These check generated models, configuration filtering, client interactions, and
+modal API calls with mocks. ServiceNow instance validation is still required:
+modal preferences and lifecycle, ACL parity, Jelly rendering, Bootstrap layout,
+keyboard/focus behavior, portal framing, and native field functionality.
+
+Test an editable catalog task, a record-producer task, a task without variables
+(new-question authoring should still work), a read-only task, and an unauthorized
+task. Exercise both layouts, adding/configuring both question origins, choices,
+references, movement, merging columns, removal, repeated previews, and reopening
+the modal. Verify source answers remain unchanged.

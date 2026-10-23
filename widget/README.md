@@ -27,8 +27,9 @@ portal verify form initialization, editing then clicking Save, readonly fields,
 reference values, and the displayed local-only status. The placeholder is not
 a completed save workflow.
 
-The `sp-model` binding remains one-time. Replacing the model after initialization
-requires separate lifecycle handling and is outside this initial template.
+The `sp-model` binding remains one-time. Preview mode explicitly destroys and
+recreates the directive when replacing its model; normal mode retains the
+initial model.
 Verify panel appearance, hidden-container mode, empty-state rendering, field
 interaction, and column behavior in the ServiceNow portal; local tests do not
 compile the Angular template.
@@ -47,9 +48,10 @@ Without either setting, the normal inline demo definition renders as before.
 
 Preview mode initially waits for the agent selector. Same-origin messages are
 accepted only from the parent window. Every render calls the same widget server,
-which authorizes the original task through `TaskInputSource` and rebuilds blank
-questions from authorized source metadata. Browser options, values, and scripts
-are ignored. Previous form instances are destroyed before a new one is mounted;
+which authorizes the original task through `TaskInputSource` and normalizes the authored form through `TaskInputSource.buildDefinition`.
+Source questions use authoritative metadata; new questions accept only the GUI's
+validated type/label/choices/reference/bounds settings. Required flags and one/two
+columns are supported. Values and scripts are not accepted. Previous form instances are destroyed before a new one is mounted;
 stale responses are ignored. Preview mode disables Save in both HTML and code.
 Normal mode does not register the preview message listener.
 
