@@ -42,7 +42,7 @@
             </div>
             <div class="col-sm-7">
                 <h3>End-user preview</h3>
-                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/esc?id=newpage&amp;table=${jvar_task_table}&amp;sys_id=${jvar_task_id}&amp;sysparm_scripted_preview=true"></iframe>
+                <iframe id="form-preview" title="End-user form preview" style="display:none; width:100%; min-height:600px; border:0" data-src="/esc?id=newpage&amp;table=${jvar_task_table}&amp;sys_id=${jvar_task_id}&amp;sysparm_scripted_preview=true"></iframe>
             </div>
         </div>
     </div>

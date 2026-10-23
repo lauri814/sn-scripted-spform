@@ -10,6 +10,7 @@
         var frame = document.getElementById('form-preview');
         var selected = [];
         var previewReady = false;
+        var previewStarted = false;
         var pendingDefinition;
         if (source.error) { status.textContent = source.error; return; }
         document.getElementById('source-summary').textContent = source.taskNumber + (source.ritmNumber ? ' / ' + source.ritmNumber : '');
@@ -42,16 +43,18 @@
             frame.contentWindow.postMessage({type: 'scripted-input-preview', definition: pendingDefinition, taskId: source.taskId}, window.location.origin);
         }
         window.addEventListener('message', function (event) {
-            if (event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
+            if (!previewStarted || event.origin !== window.location.origin || event.source !== frame.contentWindow) return;
             if (event.data && event.data.type === 'scripted-input-preview-result') {
                 status.textContent = event.data.error || 'Preview updated. No request variables were changed.';
             }
             if (event.data && event.data.type === 'scripted-input-preview-ready') {previewReady = true; send();}
         });
         frame.addEventListener('load', function () {
+            if (!previewStarted) return;
             frame.contentWindow.postMessage({type: 'scripted-input-preview-ping'}, window.location.origin);
         });
         button.addEventListener('click', function () {
+            if (!selected.length) return;
             pendingDefinition = {
                 schemaVersion: 1,
                 id: 'agent-input-form',
@@ -63,6 +66,11 @@
                 })
             };
             document.getElementById('generated-definition').textContent = JSON.stringify(pendingDefinition, null, 2);
+            if (!previewStarted) {
+                previewStarted = true;
+                frame.style.display = 'block';
+                frame.setAttribute('src', frame.getAttribute('data-src'));
+            }
             status.textContent = previewReady ? 'Loading preview…' : 'Waiting for the preview page. Check the portal preview installation if it does not load.';
             send();
         });

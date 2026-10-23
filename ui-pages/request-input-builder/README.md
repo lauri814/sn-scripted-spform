@@ -88,3 +88,7 @@ variable read roles, static choices, disabled types, reference qualifiers,
 empty sources, blank starting answers, selecting/deselecting, repeated previews,
 and HTML-like question labels. Verify current source values remain unchanged.
 Then test the page from each intended Classic/Workspace entry point.
+
+The agent preview iframe remains hidden and does not load the portal until the
+first **Preview form** click. Subsequent clicks reuse it and send updated
+definitions. Selecting questions alone does not load it.

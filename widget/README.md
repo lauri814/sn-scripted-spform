@@ -62,3 +62,7 @@ To migrate an existing installation, replace the separate preview widget instanc
 on `newpage` with this widget, update its three code fields, and
 update the UI Page HTML for the preview-mode URL. The old preview widget can be
 removed from the instance after confirming nothing else uses it.
+
+The agent preview iframe remains hidden and does not load the portal until the
+first **Preview form** click. Subsequent clicks reuse it and send updated
+definitions. Selecting questions alone does not load it.
