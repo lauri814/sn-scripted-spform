@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<j:jelly trim="false" xmlns:j="jelly:core" xmlns:g="glide">
+    <g:evaluate var="jvar_source_json">
+        var payload;
+        try {
+            payload = new TaskInputSource().read(RP.getParameterValue('sysparm_task_id'));
+        } catch (error) {
+            payload = {error: String(error.message || error)};
+        }
+        JSON.stringify(payload);
+    </g:evaluate>
+    <textarea id="source-data" style="display:none" aria-hidden="true"><j:out value="${jvar_source_json}" escapeText="true" /></textarea>
+    <div class="container-fluid" id="request-input-builder">
+        <h2>Request additional input</h2>
+        <p id="source-summary"></p>
+        <p class="text-muted">Choose questions for a separate input form. Source task variables will not be updated.</p>
+        <div class="form-group">
+            <label for="input-form-title">Form title</label>
+            <input id="input-form-title" class="form-control" value="Additional information needed" />
+        </div>
+        <p id="builder-status" role="status" aria-live="polite"></p>
+        <div class="row">
+            <div class="col-sm-5">
+                <h3>Available questions</h3>
+                <div id="available-variables"></div>
+                <button id="preview-form" type="button" class="btn btn-primary" disabled="disabled">Preview form</button>
+                <details>
+                    <summary>Advanced: generated JSON</summary>
+                    <textarea id="generated-definition" class="form-control" rows="12" readonly="readonly" spellcheck="false" aria-label="Generated form JSON"></textarea>
+                </details>
+            </div>
+            <div class="col-sm-7">
+                <h3>End-user preview</h3>
+                <iframe id="form-preview" title="End-user form preview" style="width:100%; min-height:600px; border:0" src="/sp?id=scripted_input_preview"></iframe>
+            </div>
+        </div>
+    </div>
+</j:jelly>

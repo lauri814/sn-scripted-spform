@@ -1,0 +1,11 @@
+<p class="text-muted" ng-if="!c.render && !c.loading && !c.error">${Select questions and choose Preview form.}</p>
+<p role="status" ng-if="c.loading">${Loading preview...}</p>
+<div class="alert alert-danger" role="alert" ng-if="c.error">{{c.error}}</div>
+<div class="panel panel-default" ng-if="c.render">
+    <div class="panel-heading"><h3 class="panel-title">{{c.data.formTitle}}</h3></div>
+    <div class="panel-body"><sp-model form-model="::c.data.myForm" mandatory="[]"></sp-model></div>
+    <div class="panel-footer clearfix">
+        <button type="button" class="btn btn-primary pull-right" disabled>${Save}</button>
+        <span class="text-muted">${Preview only. Answers are not saved.}</span>
+    </div>
+</div>

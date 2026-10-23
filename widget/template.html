@@ -8,6 +8,12 @@
         <div ng-class="{'panel-body': !data.hide_container, 'variable-editor': data.hide_container}">
             <sp-model form-model="::data.myForm" mandatory="[]"></sp-model>
         </div>
+
+        <div ng-class="{'panel-footer': !data.hide_container}" class="clearfix">
+            <button type="button" class="btn btn-primary pull-right"
+                    ng-click="c.save()" ng-disabled="!c.formReady">${Save}</button>
+            <p class="help-block" role="status" aria-live="polite" ng-if="c.saveStatus">{{c.saveStatus}}</p>
+        </div>
     </div>
 </div>
 
