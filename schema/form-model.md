@@ -211,3 +211,34 @@ and includes an Attachment field (20 MB maximum, no extension restriction).
 The GUID is created on each server execution; preserve it explicitly if adding
 server-update flows. No question or catalog item is inserted. Uploads still
 persist attachment records. Table Name and UI Page are excluded from the API.
+
+## Inline client logic and container layout
+
+Use `.onLoad(name, source)` to add an in-memory client script:
+
+```javascript
+builder.onLoad("demo_onload",
+    'function onLoad() { g_form.addInfoMessage("hello world"); }');
+```
+
+The source is a string containing the complete function declaration. It is
+registered as `{name, type: "onLoad", script, fieldName: "", tableName: ""}`
+inside `client_script.onLoad`. No script sys_id or database record is created.
+The builder does not execute or syntax-check the source. The portal form
+script environment executes it; record-free script execution still requires
+instance validation. Only include trusted application-authored source.
+
+A small generic provision, `clientScript(type, name, source, options)`, accepts
+`onLoad`, `onChange`, and `onSubmit`. For `onChange`, supply
+`options.fieldName`. This registers metadata only; advanced scripting behavior
+is not implemented or verified. `client_script.messages` remains `{}`.
+
+`containerStart(name, label, {layout: "2down"})` now emits the layout string on
+both the `_sections` section and its `_view` container entry, matching the
+updated native capture. Omission defaults to `"normal"`. The option must be a
+nonempty string; supported values depend on the ServiceNow release.
+`containerSplit()` continues to determine which fields go into each column.
+The builder does not redistribute fields based on the layout string: the supplied
+layout template renders `columns` directly and does not read `layout`. Therefore
+changing that metadata alone does not prove a different visual or keyboard order.
+The widget example now includes the demo onLoad script and `layout: "2down"`.

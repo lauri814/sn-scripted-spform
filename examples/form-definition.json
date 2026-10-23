@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "form-demo",
+  "title": "Scripted form demo",
+  "elements": [
+    {
+      "id": "field-summary",
+      "kind": "field",
+      "fieldType": "singleLineText",
+      "name": "summary",
+      "label": "Summary",
+      "options": {"mandatory": true}
+    },
+    {
+      "id": "container-details",
+      "kind": "container",
+      "name": "details",
+      "label": "Details",
+      "options": {"displayTitle": true, "layout": "2down"},
+      "columns": [
+        {
+          "id": "column-left",
+          "elements": [
+            {
+              "id": "field-description",
+              "kind": "field",
+              "fieldType": "multiLineText",
+              "name": "description",
+              "label": "Description"
+            },
+            {
+              "id": "field-owner",
+              "kind": "field",
+              "fieldType": "reference",
+              "name": "owner",
+              "label": "Owner",
+              "options": {"reference": "sys_user"}
+            }
+          ]
+        },
+        {
+          "id": "column-right",
+          "elements": [
+            {
+              "id": "field-approved",
+              "kind": "field",
+              "fieldType": "checkbox",
+              "name": "approved",
+              "label": "Approved"
+            },
+            {
+              "id": "field-priority",
+              "kind": "field",
+              "fieldType": "selectBox",
+              "name": "priority",
+              "label": "Priority",
+              "options": {
+                "value": "normal",
+                "choices": [
+                  {"id": "choice-normal", "label": "Normal", "value": "normal"},
+                  {"id": "choice-high", "label": "High", "value": "high"}
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": [
+    {
+      "id": "script-welcome",
+      "name": "Welcome",
+      "type": "onLoad",
+      "source": "function onLoad() { g_form.addInfoMessage(\"hello world\"); }"
+    }
+  ]
+}

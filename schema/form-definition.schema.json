@@ -1,0 +1,373 @@
+{
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "title": {
+      "type": "string"
+    },
+    "elements": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/field"
+          },
+          {
+            "$ref": "#/$defs/container"
+          }
+        ]
+      }
+    },
+    "scripts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/script"
+      }
+    },
+    "editor": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "id",
+    "elements"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Scripted form definition v1",
+  "$defs": {
+    "choice": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "label": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "hashKey": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "fieldOptions": {
+      "type": "object",
+      "properties": {
+        "displayValue": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "string"
+        },
+        "placeholder": {
+          "type": "string"
+        },
+        "hashKey": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "searchField": {
+          "type": "string"
+        },
+        "defaultOperator": {
+          "type": "string"
+        },
+        "qualifier": {
+          "type": "string"
+        },
+        "choice_direction": {
+          "type": "string"
+        },
+        "lookup_table": {
+          "type": "string"
+        },
+        "lookup_value": {
+          "type": "string"
+        },
+        "lookup_label": {
+          "type": "string"
+        },
+        "allowedExtensions": {
+          "type": "string"
+        },
+        "help_text": {
+          "type": "string"
+        },
+        "visible": {
+          "type": "boolean"
+        },
+        "mandatory": {
+          "type": "boolean"
+        },
+        "readonly": {
+          "type": "boolean"
+        },
+        "useConfirmation": {
+          "type": "boolean"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "maxFileSize": {
+          "type": "number"
+        },
+        "value": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/choice"
+          }
+        },
+        "widget": {
+          "type": "object"
+        },
+        "display_value_list": {
+          "type": "array"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "field": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "editor": {
+          "type": "object"
+        },
+        "kind": {
+          "const": "field"
+        },
+        "fieldType": {
+          "enum": [
+            "singleLineText",
+            "wideSingleLineText",
+            "multiLineText",
+            "reference",
+            "yesNo",
+            "html",
+            "richTextLabel",
+            "ipAddress",
+            "date",
+            "dateTime",
+            "duration",
+            "url",
+            "email",
+            "label",
+            "breakField",
+            "selectBox",
+            "multipleChoice",
+            "lookupSelectBox",
+            "lookupMultipleChoice",
+            "numericScale",
+            "masked",
+            "checkbox",
+            "requestedFor",
+            "listCollector",
+            "custom",
+            "customWithLabel",
+            "attachment"
+          ]
+        },
+        "options": {
+          "$ref": "#/$defs/fieldOptions"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "label",
+        "fieldType"
+      ],
+      "additionalProperties": false
+    },
+    "column": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "elements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/field"
+          }
+        },
+        "hashKey": {
+          "type": "string"
+        },
+        "editor": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "elements"
+      ],
+      "additionalProperties": false
+    },
+    "container": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "editor": {
+          "type": "object"
+        },
+        "kind": {
+          "const": "container"
+        },
+        "options": {
+          "type": "object",
+          "properties": {
+            "visible": {
+              "type": "boolean"
+            },
+            "mandatory": {
+              "type": "boolean"
+            },
+            "readonly": {
+              "type": "boolean"
+            },
+            "displayTitle": {
+              "type": "boolean"
+            },
+            "layout": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "hashKey": {
+              "type": "string"
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "$ref": "#/$defs/column"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "name",
+        "label",
+        "columns"
+      ],
+      "additionalProperties": false
+    },
+    "script": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "name": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "type": {
+          "enum": [
+            "onLoad",
+            "onChange",
+            "onSubmit"
+          ]
+        },
+        "source": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "fieldName": {
+          "type": "string"
+        },
+        "editor": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "type",
+        "source"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "onChange"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "fieldName"
+            ],
+            "properties": {
+              "fieldName": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]*$"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

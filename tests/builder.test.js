@@ -65,3 +65,25 @@ console.log('Widget example generates successfully.');
 
 assert.equal(context.data.myForm._fields.attachment.type, "sc_attachment");
 assert.equal(context.data.myForm._attachmentGUID, context.gs.generateGUID());
+
+const scripted = new Builder()
+ .onLoad('hello', 'function onLoad() { g_form.addInfoMessage("hello world"); }')
+ .clientScript('onChange', 'change', 'function onChange() {}', {fieldName: 'summary'})
+ .containerStart('configured', 'Configured', {layout: '2down'})
+ .singleLineText('summary', 'Summary').containerSplit()
+ .singleLineText('other', 'Other').containerEnd().build();
+assert.equal(scripted.client_script.onLoad[0].type, 'onLoad');
+assert.equal(scripted.client_script.onLoad[0].fieldName, '');
+assert(!('sys_id' in scripted.client_script.onLoad[0]));
+assert.equal(scripted.client_script.onChange[0].fieldName, 'summary');
+assert.equal(scripted._sections[0].layout, '2down');
+assert.equal(scripted._view[0].layout, '2down');
+assert.equal(scripted._sections[0].columns[1].fields[0].name, 'other');
+assert.throws(() => new Builder().clientScript('invalid', 'bad', 'function bad() {}'));
+assert.throws(() => new Builder().onLoad('empty', ' '));
+assert.throws(() => new Builder().clientScript('onChange', 'missing_field', 'function onChange() {}'));
+assert.throws(() => new Builder().containerStart('bad_layout', '', {layout: ''}));
+assert.equal(new Builder().containerStart('default_layout', '').containerEnd().build()._view[0].layout, 'normal');
+assert.equal(context.data.myForm.client_script.onLoad.length, 1);
+assert.equal(context.data.myForm._sections[1].layout, '2down');
+console.log('Inline script registration and container layout checks passed.');

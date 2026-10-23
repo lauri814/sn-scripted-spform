@@ -5,6 +5,7 @@
     });
 
     builder
+        .onLoad("demo_onload", 'function onLoad() { g_form.addInfoMessage("hello world"); }')
         .singleLineText("single_line_text", "Single Line Text")
         .multiLineText("multi_line_text", "Multi Line Text")
         .reference("reference", "Reference", {
@@ -12,7 +13,7 @@
             attributes: "ref_ac_columns=email,ref_ac_columns_search=true,ref_ac_order_by=name,ref_auto_completer=AJAXTableCompleter"
         })
         .yesNo("yes_no", "Yes / No", {value: "Yes"})
-        .containerStart("more_questions", "More questions", {displayTitle: true})
+        .containerStart("more_questions", "More questions", {displayTitle: true, layout: "2down"})
         .wideSingleLineText("wide_text", "Wide Single Line Text")
         .selectBox("select_box", "Select Box", {
             choices: [{label: "First", value: "first"}, {label: "Second", value: "second"}]

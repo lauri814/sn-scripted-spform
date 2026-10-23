@@ -31,6 +31,29 @@ ScriptedFormBuilder.prototype = {
             this._model._attachmentGUID = options.attachmentGuid;
     },
 
+    // Script sources execute in the portal form environment, not on the server.
+    clientScript: function (scriptType, name, source, options) {
+        options = options || {};
+        if (scriptType !== "onLoad" && scriptType !== "onChange" && scriptType !== "onSubmit")
+            throw new Error("Unsupported client script type: " + scriptType);
+        if (typeof source !== "string" || !source.replace(/\s/g, ""))
+            throw new Error("Client script source must be a nonempty string");
+        if (scriptType === "onChange" && !options.fieldName)
+            throw new Error("onChange requires fieldName");
+        this._model.client_script[scriptType].push({
+            name: name,
+            type: scriptType,
+            script: source,
+            fieldName: options.fieldName || "",
+            tableName: ""
+        });
+        return this;
+    },
+
+    onLoad: function (name, source) {
+        return this.clientScript("onLoad", name, source);
+    },
+
     // Layout state is separate from the serialized model.
     _newSection: function () {
         return {id: "section_" + this._model._sections.length, name: "", caption: "",
@@ -41,17 +64,21 @@ ScriptedFormBuilder.prototype = {
         options = options || {};
         if (this._container)
             throw new Error("Nested containers are not supported yet");
+        var layout = options.layout === undefined ? "normal" : options.layout;
+        if (typeof layout !== "string" || !layout.replace(/\s/g, ""))
+            throw new Error("Container layout must be a nonempty string");
         var field = this._createField(name, label, "container_start", options);
         field._children = [];
         field._cascade_hidden = false;
         this._model._fields[name] = field;
         var section = this._newSection();
         section.id = section.name = name;
+        section.layout = layout;
         section.caption = options.displayTitle ? label : "";
         if (options.hashKey !== undefined) section.hashKey = options.hashKey;
         if (options.columnHashKey !== undefined) section.columns[0].hashKey = options.columnHashKey;
         this._model._sections.push(section);
-        var entry = {name: name, type: "container_start", variables: [],
+        var entry = {name: name, type: "container_start", layout: layout, variables: [],
             display_title: options.displayTitle === true, question_text: label};
         this._model._view.push(entry);
         this._container = {field: field, section: section, view: entry};
